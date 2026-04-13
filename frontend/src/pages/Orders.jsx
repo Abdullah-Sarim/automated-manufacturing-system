@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getOrders, getProducts, getDealers, createOrder, updateOrder, generateBill } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Orders = () => {
@@ -9,6 +10,7 @@ const Orders = () => {
   const [products, setProducts] = useState([]);
   const [dealers, setDealers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showBillModal, setShowBillModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -115,93 +117,110 @@ const Orders = () => {
 
   if (loading) return <div className="p-6">Loading...</div>;
 
+  const filteredOrders = orders.filter(o => 
+    o.orderID?.toString().includes(searchQuery) ||
+    o.productName?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-5 w-full max-w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <h1 className="text-2xl font-bold text-secondary">Orders</h1>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search orders..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-4 py-2 w-64 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+          />
+        </div>
         {(user?.role === 'dealer' || user?.role === 'admin') && (
           <button onClick={() => setShowModal(true)} className="btn btn-primary">New Order</button>
         )}
       </div>
 
-      <div className="card">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Product</th>
-              {user?.role === 'admin' || user?.role === 'manager' ? <th>Dealer</th> : null}
-              <th>Qty</th>
-              <th>Amount</th>
-              <th>Availability</th>
-              <th>Due Date</th>
-              <th>Expected Delivery</th>
-              <th>Payment</th>
-              <th>Workflow</th>
-              <th>Status</th>
-              <th>Date</th>
-              {(user?.role === 'admin' || user?.role === 'manager') && <th>Actions</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map(order => {
-              const availability = getAvailabilityBadge(order.availability);
-              return (
-                <tr key={order.orderID}>
-                  <td>#{order.orderID}</td>
-                  <td>{order.productName}</td>
-                  {user?.role === 'admin' || user?.role === 'manager' ? <td>{order.companyName || '-'}</td> : null}
-                  <td>{order.quantity}</td>
-                  <td>${order.totalAmount?.toFixed(2)}</td>
-                  <td>
-                    <span className={`badge ${availability.color}`}>{availability.label}</span>
-                  </td>
-                  <td>{order.billDueDate ? new Date(order.billDueDate).toLocaleDateString() : '-'}</td>
-                  <td>{order.billDeliveryDate ? new Date(order.billDeliveryDate).toLocaleDateString() : '-'}</td>
-                  <td>
-                    <span className={`badge ${order.paymentStatus === 'paid' ? 'badge-completed' : order.paymentStatus === 'pending' ? 'badge-pending' : 'bg-gray-100 text-gray-800'}`}>
-                      {order.paymentStatus || 'No Bill'}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`badge ${getWorkflowStepColor(order.workflowStep)}`}>
-                      {getWorkflowStepLabel(order.workflowStep)}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`badge badge-${order.status}`}>{order.status}</span>
-                  </td>
-                  <td>{new Date(order.createdAt || Date.now()).toLocaleDateString()}</td>
-                  {(user?.role === 'admin' || user?.role === 'manager') && (
+      <div className="card w-full max-w-full overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table min-w-full">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Product</th>
+                {user?.role === 'admin' || user?.role === 'manager' ? <th>Dealer</th> : null}
+                <th>Qty</th>
+                <th>Amount</th>
+                <th>Availability</th>
+                <th>Due Date</th>
+                <th>Expected Delivery</th>
+                <th>Payment</th>
+                <th>Workflow</th>
+                <th>Status</th>
+                <th>Date</th>
+                {(user?.role === 'admin' || user?.role === 'manager') && <th>Actions</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredOrders.map(order => {
+                const availability = getAvailabilityBadge(order.availability);
+                return (
+                  <tr key={order.orderID}>
+                    <td>#{order.orderID}</td>
+                    <td>{order.productName}</td>
+                    {user?.role === 'admin' || user?.role === 'manager' ? <td>{order.companyName || '-'}</td> : null}
+                    <td>{order.quantity}</td>
+                    <td>${order.totalAmount?.toFixed(2)}</td>
                     <td>
-                      {order.workflowStep !== 'billing' && order.status !== 'completed' && (
-                        <button 
-                          onClick={() => handleProcessOrder(order)}
-                          className="text-accent hover:underline mr-3 text-sm"
-                        >
-                          Generate Bill
-                        </button>
-                      )}
-                      {order.workflowStep === 'billing' && (
-                        <span className="text-green-600 text-sm mr-3 font-semibold">Billed</span>
-                      )}
-                      <select
-                        className="text-sm border rounded px-2 py-1"
-                        value={order.status}
-                        onChange={(e) => handleStatusChange(order.orderID, e.target.value)}
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
+                      <span className={`badge ${availability.color}`}>{availability.label}</span>
                     </td>
-                  )}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    <td>{order.billDueDate ? new Date(order.billDueDate).toLocaleDateString() : '-'}</td>
+                    <td>{order.billDeliveryDate ? new Date(order.billDeliveryDate).toLocaleDateString() : '-'}</td>
+                    <td>
+                      <span className={`badge ${order.paymentStatus === 'paid' ? 'badge-completed' : order.paymentStatus === 'pending' ? 'badge-pending' : 'bg-gray-100 text-gray-800'}`}>
+                        {order.paymentStatus || 'No Bill'}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge ${getWorkflowStepColor(order.workflowStep)}`}>
+                        {getWorkflowStepLabel(order.workflowStep)}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge badge-${order.status}`}>{order.status}</span>
+                    </td>
+                    <td>{new Date(order.createdAt || Date.now()).toLocaleDateString()}</td>
+                    {(user?.role === 'admin' || user?.role === 'manager') && (
+                      <td>
+                        {order.workflowStep !== 'billing' && order.status !== 'completed' && (
+                          <button 
+                            onClick={() => handleProcessOrder(order)}
+                            className="text-accent hover:underline mr-3 text-sm"
+                          >
+                            Generate Bill
+                          </button>
+                        )}
+                        {order.workflowStep === 'billing' && (
+                          <span className="text-green-600 text-sm mr-3 font-semibold">Billed</span>
+                        )}
+                        <select
+                          className="text-sm border rounded px-2 py-1"
+                          value={order.status}
+                          onChange={(e) => handleStatusChange(order.orderID, e.target.value)}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="processing">Processing</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showModal && (

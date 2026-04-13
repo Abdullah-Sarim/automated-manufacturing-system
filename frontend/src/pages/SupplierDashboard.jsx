@@ -136,13 +136,13 @@ const SupplierDashboard = () => {
   const totalReceived = paidBills.reduce((sum, b) => sum + (b.amount || 0), 0);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 w-full max-w-full">
+      <div>
         <h1 className="text-2xl font-bold text-secondary">Supplier Dashboard</h1>
+        <p className="text-gray-600">Welcome! Here you can view quotation requests and submit your quotes.</p>
       </div>
-      <p className="text-gray-600">Welcome! Here you can view quotation requests and submit your quotes.</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="card bg-gradient-to-r from-blue-500 to-blue-600 text-white">
           <p className="text-sm opacity-80">Total Quotations</p>
           <p className="text-3xl font-bold">{myQuotations.length}</p>
@@ -161,41 +161,43 @@ const SupplierDashboard = () => {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card w-full max-w-full overflow-hidden">
         <h2 className="text-xl font-semibold mb-4">My Quotations</h2>
         {myQuotations.length === 0 ? (
           <p className="text-gray-500">No quotation requests yet.</p>
         ) : (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Quote ID</th>
-                <th>Material</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Delivery Date</th>
-                <th>Status</th>
-                <th>Submitted On</th>
-              </tr>
-            </thead>
-            <tbody>
-              {myQuotations.map(quote => (
-                <tr key={quote.quoteID}>
-                  <td>#{quote.quoteID}</td>
-                  <td>{quote.materialName || 'Raw Material'}</td>
-                  <td>{quote.quantity || '-'}</td>
-                  <td className="font-semibold">${quote.price}</td>
-                  <td>{quote.deliveryDate || 'Not specified'}</td>
-                  <td>
-                    <span className={`badge ${getStatusColor(quote.status)}`}>
-                      {quote.status === 'approved' ? 'Approved' : quote.status === 'rejected' ? 'Rejected' : 'Pending'}
-                    </span>
-                  </td>
-                  <td>{new Date(quote.createdAt).toLocaleDateString()}</td>
+          <div className="overflow-x-auto">
+            <table className="table min-w-full">
+              <thead>
+                <tr>
+                  <th>Quote ID</th>
+                  <th>Material</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Delivery Date</th>
+                  <th>Status</th>
+                  <th>Submitted On</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {myQuotations.map(quote => (
+                  <tr key={quote.quoteID}>
+                    <td>#{quote.quoteID}</td>
+                    <td>{quote.materialName || 'Raw Material'}</td>
+                    <td>{quote.quantity || '-'}</td>
+                    <td className="font-semibold">${quote.price}</td>
+                    <td>{quote.deliveryDate || 'Not specified'}</td>
+                    <td>
+                      <span className={`badge ${getStatusColor(quote.status)}`}>
+                        {quote.status === 'approved' ? 'Approved' : quote.status === 'rejected' ? 'Rejected' : 'Pending'}
+                      </span>
+                    </td>
+                    <td>{new Date(quote.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

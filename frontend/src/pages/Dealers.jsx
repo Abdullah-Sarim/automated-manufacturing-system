@@ -55,40 +55,42 @@ const Dealers = () => {
   if (loading) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 w-full max-w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-secondary">Dealers</h1>
         <button onClick={() => { setEditId(null); setFormData({ companyName: '', contactPerson: '', phone: '', address: '', username: '', password: '', name: '', email: '' }); setShowModal(true); }} className="btn btn-primary">Add Dealer</button>
       </div>
 
-      <div className="card">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Company</th>
-              <th>Contact</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dealers.map(dealer => (
-              <tr key={dealer.dealerID}>
-                <td>{dealer.dealerID}</td>
-                <td>{dealer.companyName}</td>
-                <td>{dealer.contactPerson || '-'}</td>
-                <td>{dealer.phone || '-'}</td>
-                <td>{dealer.email || '-'}</td>
-                <td>
-                  <button onClick={() => handleEdit(dealer)} className="text-accent hover:underline mr-3">Edit</button>
-                  <button onClick={() => handleDelete(dealer.dealerID)} className="text-danger hover:underline">Delete</button>
-                </td>
+      <div className="card w-full max-w-full overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table min-w-full">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Company</th>
+                <th>Contact</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {dealers.map(dealer => (
+                <tr key={dealer.dealerID}>
+                  <td>{dealer.dealerID}</td>
+                  <td>{dealer.companyName}</td>
+                  <td>{dealer.contactPerson || '-'}</td>
+                  <td>{dealer.phone || '-'}</td>
+                  <td>{dealer.email || '-'}</td>
+                  <td>
+                    <button onClick={() => handleEdit(dealer)} className="text-accent hover:underline mr-3">Edit</button>
+                    <button onClick={() => handleDelete(dealer.dealerID)} className="text-danger hover:underline">Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showModal && (

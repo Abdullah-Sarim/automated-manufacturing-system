@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getBills, getOrders, getDealers, createBill, updateBill, payBill, deleteBill } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { Search, Users, Truck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Bills = () => {
@@ -9,6 +10,8 @@ const Bills = () => {
   const [orders, setOrders] = useState([]);
   const [dealers, setDealers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [billTab, setBillTab] = useState('dealer');
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ orderID: '', dealerID: '', amount: '', dueDate: '' });
 
@@ -69,16 +72,26 @@ const handlePay = async (id) => {
   const totalSupplierPaid = supplierPaid.reduce((sum, b) => sum + (b.amount || 0), 0);
   const totalSupplierPending = supplierPending.reduce((sum, b) => sum + (b.amount || 0), 0);
 
+  const filteredBills = bills.filter(b => 
+    b.billID?.toString().includes(searchQuery) ||
+    b.companyName?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 w-full max-w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-secondary">Bills</h1>
-        {(user?.role === 'admin' || user?.role === 'manager') && (
-          <button onClick={() => setShowModal(true)} className="btn btn-primary">New Bill</button>
-        )}
+        <div className="flex items-center gap-4">
+
+          {(user?.role === 'admin' || user?.role === 'manager') && (
+            <button onClick={() => setShowModal(true)} className="btn btn-primary">New Bill</button>
+          )}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="card bg-green-50">
           <h2 className="text-xl font-semibold mb-4 text-green-700">Dealer Payments (Received)</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -124,28 +137,69 @@ const handlePay = async (id) => {
         </div>
       </div>
 
-      <div className="card">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Type</th>
-              {user?.role === 'admin' || user?.role === 'manager' ? <th>Dealer/Supplier</th> : null}
-              <th>Amount</th>
-              <th>Due Date</th>
-              <th>Expected Delivery</th>
-              {user?.role === 'admin' || user?.role === 'manager' ? <th>Paid Date</th> : null}
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bills.map(bill => {
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setBillTab('dealer')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+            billTab === 'dealer'
+              ? 'bg-primary text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          <Truck className="w-4 h-4" />
+          Dealer Bills
+        </button>
+        <button
+          onClick={() => setBillTab('supplier')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+            billTab === 'supplier'
+              ? 'bg-primary text-white'
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          Supplier Bills
+        </button>
+
+        <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by Bill ID or Company..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 w-64 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            />
+          </div>
+      </div>
+
+      <div className="card w-full max-w-full overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table min-w-full">
+            <thead>
+              <tr>
+                <th>ID</th>
+                {user?.role === 'admin' || user?.role === 'manager' ? <th>Dealer/Supplier</th> : null}
+                <th>Amount</th>
+                <th>Due Date</th>
+                <th>Expected Delivery</th>
+                {user?.role === 'admin' || user?.role === 'manager' ? <th>Paid Date</th> : null}
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+            {bills.filter(bill => {
+              const matchesTab = billTab === 'dealer' ? bill.billType !== 'supplier' : bill.billType === 'supplier';
+              const matchesSearch = !searchQuery || 
+                bill.billID?.toString().includes(searchQuery) || 
+                bill.companyName?.toLowerCase().includes(searchQuery.toLowerCase());
+              return matchesTab && matchesSearch;
+            }).map(bill => {
               const isSupplier = getIsSupplierBill(bill);
               return (
                 <tr key={bill.billID}>
                   <td>#{bill.billID}</td>
-                  <td>{isSupplier ? 'Supplier' : 'Dealer'}</td>
                   {user?.role === 'admin' || user?.role === 'manager' ? <td>{bill.supplierName || bill.companyName || '-'}</td> : null}
                   <td>${bill.amount?.toFixed(2)}</td>
                   <td>{bill.dueDate || '-'}</td>
@@ -161,7 +215,8 @@ const handlePay = async (id) => {
               );
             })}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
 
       {showModal && (

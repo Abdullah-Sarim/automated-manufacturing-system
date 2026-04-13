@@ -109,17 +109,17 @@ const Profile = () => {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 w-full max-w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-secondary">My Profile</h1>
-        <div className="flex space-x-2">
+        <div className="flex flex-wrap gap-2">
           <button onClick={() => setShowEditModal(true)} className="btn btn-primary">Edit Profile</button>
           <button onClick={() => setShowPasswordModal(true)} className="btn btn-secondary">Change Password</button>
           {!isAdmin && <button onClick={() => setShowDeleteConfirm(true)} className="btn btn-danger">Delete Account</button>}
         </div>
       </div>
 
-      <div className="card">
+      <div className="card w-full max-w-full overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="text-lg font-semibold mb-4">Personal Information</h3>

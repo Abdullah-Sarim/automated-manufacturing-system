@@ -84,11 +84,13 @@ const SupplierQuotations = () => {
   const respondedQuotes = quotations.filter(q => q.responseStatus === 'responded');
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-secondary">Quotation Requests</h1>
-      <p className="text-gray-600">Review quotation requests and submit your response with price and delivery date.</p>
+    <div className="space-y-6 w-full max-w-full">
+      <div>
+        <h1 className="text-2xl font-bold text-secondary">Quotation Requests</h1>
+        <p className="text-gray-600">Review quotation requests and submit your response with price and delivery date.</p>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
           <p className="text-sm opacity-80">Awaiting Your Response</p>
           <p className="text-3xl font-bold">{waitingQuotes.length}</p>
@@ -104,10 +106,10 @@ const SupplierQuotations = () => {
       </div>
 
       {waitingQuotes.length > 0 && (
-        <div className="card border-l-4 border-yellow-400">
+        <div className="card border-l-4 border-yellow-400 w-full max-w-full overflow-hidden">
           <h2 className="text-xl font-semibold mb-4 text-yellow-700">Action Required - Respond to These Requests</h2>
           <div className="overflow-x-auto">
-            <table className="table">
+            <table className="table min-w-full">
               <thead>
                 <tr>
                   <th>Request ID</th>
@@ -146,7 +148,7 @@ const SupplierQuotations = () => {
         </div>
       )}
 
-      <div className="card">
+      <div className="card w-full max-w-full overflow-hidden">
         <h2 className="text-xl font-semibold mb-4">Your Quotation History</h2>
         {quotations.length === 0 ? (
           <div className="text-center py-8">
@@ -156,67 +158,69 @@ const SupplierQuotations = () => {
             <p className="text-gray-500">No quotation requests yet.</p>
           </div>
         ) : (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Material</th>
-                <th>Qty</th>
-                <th>Expected Price</th>
-                <th>Expected Delivery</th>
-                <th>Your Price</th>
-                <th>Your Delivery</th>
-                <th>Response Status</th>
-                <th>Final Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {quotations.map(quote => (
-                <tr key={quote.quoteID}>
-                  <td>#{quote.quoteID}</td>
-                  <td>{quote.materialName || 'Raw Material'}</td>
-                  <td>{quote.quantity || '-'}</td>
-                  <td className="text-gray-500">${quote.expectedPrice}</td>
-                  <td className="text-gray-500">{quote.expectedDeliveryDate}</td>
-                  <td>
-                    {quote.responseStatus === 'waiting' ? (
-                      <span className="text-gray-400">-</span>
-                    ) : (
-                      <span className="font-bold text-green-600">${quote.price}</span>
-                    )}
-                  </td>
-                  <td>
-                    {quote.responseStatus === 'waiting' ? (
-                      <span className="text-gray-400">-</span>
-                    ) : (
-                      <span className="font-bold text-green-600">{quote.deliveryDate}</span>
-                    )}
-                  </td>
-                  <td>
-                    <span className={`badge ${getResponseStatusColor(quote.responseStatus)}`}>
-                      {quote.responseStatus === 'responded' ? 'Responded' : 'Waiting'}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`badge ${getStatusColor(quote.status)}`}>
-                      {quote.status}
-                    </span>
-                  </td>
-                  <td>
-                    {quote.status === 'approved' && (
-                      <button 
-                        onClick={() => { setSelectedQuote(quote); setShowBillModal(true); }}
-                        className="text-accent hover:underline text-sm"
-                      >
-                        Generate Bill
-                      </button>
-                    )}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="table min-w-full">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Material</th>
+                  <th>Qty</th>
+                  <th>Expected Price</th>
+                  <th>Expected Delivery</th>
+                  <th>Your Price</th>
+                  <th>Your Delivery</th>
+                  <th>Response Status</th>
+                  <th>Final Status</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {quotations.map(quote => (
+                  <tr key={quote.quoteID}>
+                    <td>#{quote.quoteID}</td>
+                    <td>{quote.materialName || 'Raw Material'}</td>
+                    <td>{quote.quantity || '-'}</td>
+                    <td className="text-gray-500">${quote.expectedPrice}</td>
+                    <td className="text-gray-500">{quote.expectedDeliveryDate}</td>
+                    <td>
+                      {quote.responseStatus === 'waiting' ? (
+                        <span className="text-gray-400">-</span>
+                      ) : (
+                        <span className="font-bold text-green-600">${quote.price}</span>
+                      )}
+                    </td>
+                    <td>
+                      {quote.responseStatus === 'waiting' ? (
+                        <span className="text-gray-400">-</span>
+                      ) : (
+                        <span className="font-bold text-green-600">{quote.deliveryDate}</span>
+                      )}
+                    </td>
+                    <td>
+                      <span className={`badge ${getResponseStatusColor(quote.responseStatus)}`}>
+                        {quote.responseStatus === 'responded' ? 'Responded' : 'Waiting'}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge ${getStatusColor(quote.status)}`}>
+                        {quote.status}
+                      </span>
+                    </td>
+                    <td>
+                      {quote.status === 'approved' && (
+                        <button 
+                          onClick={() => { setSelectedQuote(quote); setShowBillModal(true); }}
+                          className="text-accent hover:underline text-sm"
+                        >
+                          Generate Bill
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

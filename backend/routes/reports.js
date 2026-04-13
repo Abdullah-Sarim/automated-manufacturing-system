@@ -56,41 +56,55 @@ router.get('/dashboard', authenticate, (req, res) => {
 router.get('/sales', authenticate, authorize('admin', 'manager'), (req, res) => {
   try {
     const { period } = req.query;
-    let dateFilter = '';
+    let dateCondition = '';
     if (period === 'week') {
-      dateFilter = "WHERE createdAt >= datetime('now', '-7 days')";
+      dateCondition = "AND orders.createdAt >= datetime('now', '-7 days')";
     } else if (period === 'month') {
-      dateFilter = "WHERE createdAt >= datetime('now', '-30 days')";
+      dateCondition = "AND orders.createdAt >= datetime('now', '-30 days')";
     } else if (period === 'year') {
-      dateFilter = "WHERE createdAt >= datetime('now', '-365 days')";
+      dateCondition = "AND orders.createdAt >= datetime('now', '-365 days')";
     }
 
+    const whereClause = dateCondition ? `orders.createdAt IS NOT NULL ${dateCondition}` : 'orders.createdAt IS NOT NULL';
+
     const salesByMonth = db.all(`
-      SELECT strftime('%Y-%m', createdAt) as month, SUM(totalAmount) as total, COUNT(*) as orders
-      FROM orders ${dateFilter}
-      GROUP BY strftime('%Y-%m', createdAt)
+      SELECT strftime('%Y-%m', orders.createdAt) as month, 
+             COALESCE(SUM(orders.totalAmount), 0) as total, 
+             COUNT(*) as orders
+      FROM orders
+      WHERE ${whereClause}
+      GROUP BY strftime('%Y-%m', orders.createdAt)
       ORDER BY month
     `);
 
     const salesByProduct = db.all(`
-      SELECT p.name, SUM(o.quantity) as quantity, SUM(o.totalAmount) as total
-      FROM orders o
-      LEFT JOIN products p ON o.productID = p.productID
-      ${dateFilter}
-      GROUP BY p.name
+      SELECT COALESCE(products.name, 'Unknown') as name, 
+             COALESCE(SUM(orders.quantity), 0) as quantity, 
+             COALESCE(SUM(orders.totalAmount), 0) as total
+      FROM orders
+      LEFT JOIN products ON orders.productID = products.productID
+      WHERE ${whereClause}
+      GROUP BY COALESCE(products.name, 'Unknown')
     `);
 
     const salesByDealer = db.all(`
-      SELECT d.companyName, SUM(o.totalAmount) as total, COUNT(*) as orders
-      FROM orders o
-      LEFT JOIN dealers d ON o.dealerID = d.dealerID
-      ${dateFilter}
-      GROUP BY d.companyName
+      SELECT COALESCE(dealers.companyName, 'Unknown') as companyName, 
+             COALESCE(SUM(orders.totalAmount), 0) as total, 
+             COUNT(*) as orders
+      FROM orders
+      LEFT JOIN dealers ON orders.dealerID = dealers.dealerID
+      WHERE ${whereClause}
+      GROUP BY COALESCE(dealers.companyName, 'Unknown')
     `);
 
-    res.json({ salesByMonth, salesByProduct, salesByDealer });
+    res.json({ 
+      salesByMonth: salesByMonth || [], 
+      salesByProduct: salesByProduct || [], 
+      salesByDealer: salesByDealer || [] 
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Sales report error:', error);
+    res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 

@@ -87,8 +87,8 @@ const PlaceOrder = () => {
   if (loading) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 w-full max-w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-secondary">Place Order</h1>
           <p className="text-gray-600">Select products and place your order</p>
@@ -105,9 +105,9 @@ const PlaceOrder = () => {
         </button>
       </div>
 
-      <div className="card">
+      <div className="card w-full max-w-full overflow-hidden">
         <h2 className="text-xl font-semibold mb-4">Available Products</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map(product => (
             <div key={product.productID} className="border rounded-lg p-4 hover:shadow-lg transition-shadow">
               <h3 className="font-semibold text-lg">{product.name}</h3>
@@ -163,8 +163,8 @@ const PlaceOrder = () => {
             {cartCount === 0 ? (
               <p className="text-gray-500 text-center py-8">Your cart is empty</p>
             ) : (
-              <>
-                <table className="table">
+              <div className="overflow-x-auto">
+                <table className="table min-w-full">
                   <thead>
                     <tr>
                       <th>Product</th>
@@ -216,7 +216,7 @@ const PlaceOrder = () => {
                     {ordering ? 'Placing Order...' : `Place Order (${cartCount} items)`}
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>

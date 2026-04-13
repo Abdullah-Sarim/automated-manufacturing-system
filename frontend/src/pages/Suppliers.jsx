@@ -55,40 +55,42 @@ const Suppliers = () => {
   if (loading) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 w-full max-w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-secondary">Suppliers</h1>
         <button onClick={() => { setEditId(null); setFormData({ companyName: '', contactPerson: '', phone: '', email: '', address: '', username: '', password: '', name: '' }); setShowModal(true); }} className="btn btn-primary">Add Supplier</button>
       </div>
 
-      <div className="card">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Company</th>
-              <th>Contact</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {suppliers.map(supplier => (
-              <tr key={supplier.supplierID}>
-                <td>{supplier.supplierID}</td>
-                <td>{supplier.companyName}</td>
-                <td>{supplier.contactPerson || '-'}</td>
-                <td>{supplier.phone || '-'}</td>
-                <td>{supplier.email || '-'}</td>
-                <td>
-                  <button onClick={() => handleEdit(supplier)} className="text-accent hover:underline mr-3">Edit</button>
-                  <button onClick={() => handleDelete(supplier.supplierID)} className="text-danger hover:underline">Delete</button>
-                </td>
+      <div className="card w-full max-w-full overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table min-w-full">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Company</th>
+                <th>Contact</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {suppliers.map(supplier => (
+                <tr key={supplier.supplierID}>
+                  <td>{supplier.supplierID}</td>
+                  <td>{supplier.companyName}</td>
+                  <td>{supplier.contactPerson || '-'}</td>
+                  <td>{supplier.phone || '-'}</td>
+                  <td>{supplier.email || '-'}</td>
+                  <td>
+                    <button onClick={() => handleEdit(supplier)} className="text-accent hover:underline mr-3">Edit</button>
+                    <button onClick={() => handleDelete(supplier.supplierID)} className="text-danger hover:underline">Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showModal && (

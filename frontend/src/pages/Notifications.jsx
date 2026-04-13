@@ -56,8 +56,8 @@ const Notifications = () => {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 w-full max-w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-secondary">Notifications</h1>
           <p className="text-gray-600">
@@ -76,7 +76,7 @@ const Notifications = () => {
           <p className="text-gray-500 text-center py-8">No notifications yet</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 w-full max-w-full">
           {notifications.map(notif => (
             <div 
               key={notif.notificationID}

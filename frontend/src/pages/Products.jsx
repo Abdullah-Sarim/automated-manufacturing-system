@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { getProducts, createProduct, updateProduct, updateProductStock, deleteProduct, getLowStockProducts } from '../utils/api';
+import { Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
   const [formData, setFormData] = useState({ name: '', description: '', price: '', stock: '', reorderLevel: '' });
@@ -70,44 +72,61 @@ const Products = () => {
 
   if (loading) return <div className="p-6">Loading...</div>;
 
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.productID?.toString().includes(searchQuery)
+  );
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 w-full max-w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-secondary">Products</h1>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-4 py-2 w-64 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+          />
+        </div>
         <button onClick={() => { setEditId(null); setFormData({ name: '', description: '', price: '', stock: '', reorderLevel: '' }); setShowModal(true); }} className="btn btn-primary">Add Product</button>
       </div>
 
-      <div className="card">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Reorder Level</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map(product => (
-              <tr key={product.productID}>
-                <td>{product.productID}</td>
-                <td>{product.name}</td>
-                <td>{product.description || '-'}</td>
-                <td>${product.price}</td>
-                <td className={product.stock <= product.reorderLevel ? 'text-danger font-semibold' : ''}>{product.stock}</td>
-                <td>{product.reorderLevel}</td>
-                <td>
-                  <button onClick={() => { setStockProductId(product.productID); setShowStockModal(true); }} className="text-accent hover:underline mr-3">Stock</button>
-                  <button onClick={() => handleEdit(product)} className="text-blue-600 hover:underline mr-3">Edit</button>
-                  <button onClick={() => handleDelete(product.productID)} className="text-danger hover:underline">Delete</button>
-                </td>
+      <div className="card w-full max-w-full overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table min-w-full">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Reorder Level</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredProducts.map(product => (
+                <tr key={product.productID}>
+                  <td>{product.productID}</td>
+                  <td>{product.name}</td>
+                  <td>{product.description || '-'}</td>
+                  <td>${product.price}</td>
+                  <td className={product.stock <= product.reorderLevel ? 'text-danger font-semibold' : ''}>{product.stock}</td>
+                  <td>{product.reorderLevel}</td>
+                  <td>
+                    <button onClick={() => { setStockProductId(product.productID); setShowStockModal(true); }} className="text-accent hover:underline mr-3">Stock</button>
+                    <button onClick={() => handleEdit(product)} className="text-blue-600 hover:underline mr-3">Edit</button>
+                    <button onClick={() => handleDelete(product.productID)} className="text-danger hover:underline">Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showModal && (

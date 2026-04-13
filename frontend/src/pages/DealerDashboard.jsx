@@ -145,13 +145,13 @@ const DealerDashboard = () => {
   const paidBills = bills.filter(b => b.paymentStatus === 'paid');
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 w-full max-w-full">
+      <div>
         <h1 className="text-2xl font-bold text-secondary">Dealer Dashboard</h1>
+        <p className="text-gray-600">Welcome, {user?.name}! Track your orders and view bills.</p>
       </div>
-      <p className="text-gray-600">Welcome, {user?.name}! Track your orders and view bills.</p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card bg-gradient-to-r from-blue-500 to-blue-600 text-white">
           <p className="text-sm opacity-80">My Orders</p>
           <p className="text-3xl font-bold">{myOrders.length}</p>
@@ -166,77 +166,81 @@ const DealerDashboard = () => {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card w-full max-w-full overflow-hidden">
         <h2 className="text-xl font-semibold mb-4">My Orders</h2>
         {myOrders.length === 0 ? (
           <p className="text-gray-500">No orders yet. Go to Place Order to create your first order.</p>
         ) : (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Amount</th>
-                <th>Due Date</th>
-                <th>Expected Delivery</th>
-                <th>Workflow Status</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {myOrders.map(order => (
-                <tr key={order.orderID}>
-                  <td>#{order.orderID}</td>
-                  <td>{order.productName}</td>
-                  <td>{order.quantity}</td>
-                  <td>${order.totalAmount?.toFixed(2)}</td>
-                  <td>{order.billDueDate ? new Date(order.billDueDate).toLocaleDateString() : '-'}</td>
-                  <td>{order.billDeliveryDate ? new Date(order.billDeliveryDate).toLocaleDateString() : '-'}</td>
-                  <td>
-                    <span className={`badge ${getWorkflowStepColor(order.workflowStep)}`}>
-                      {getWorkflowStepLabel(order.workflowStep)}
-                    </span>
-                  </td>
-                  <td>{new Date(order.createdAt || Date.now()).toLocaleDateString()}</td>
+          <div className="overflow-x-auto">
+            <table className="table min-w-full">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Amount</th>
+                  <th>Due Date</th>
+                  <th>Expected Delivery</th>
+                  <th>Workflow Status</th>
+                  <th>Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {myOrders.map(order => (
+                  <tr key={order.orderID}>
+                    <td>#{order.orderID}</td>
+                    <td>{order.productName}</td>
+                    <td>{order.quantity}</td>
+                    <td>${order.totalAmount?.toFixed(2)}</td>
+                    <td>{order.billDueDate ? new Date(order.billDueDate).toLocaleDateString() : '-'}</td>
+                    <td>{order.billDeliveryDate ? new Date(order.billDeliveryDate).toLocaleDateString() : '-'}</td>
+                    <td>
+                      <span className={`badge ${getWorkflowStepColor(order.workflowStep)}`}>
+                        {getWorkflowStepLabel(order.workflowStep)}
+                      </span>
+                    </td>
+                    <td>{new Date(order.createdAt || Date.now()).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      <div className="card">
+      <div className="card w-full max-w-full overflow-hidden">
         <h2 className="text-xl font-semibold mb-4">My Bills</h2>
         {bills.length === 0 ? (
           <p className="text-gray-500">No bills yet.</p>
         ) : (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Bill ID</th>
-                <th>Order ID</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Due Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bills.map(bill => (
-                <tr key={bill.billID}>
-                  <td>#{bill.billID}</td>
-                  <td>#{bill.orderNumber}</td>
-                  <td>${bill.amount?.toFixed(2)}</td>
-                  <td>
-                    <span className={`badge badge-${bill.paymentStatus}`}>
-                      {bill.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
-                    </span>
-                  </td>
-                  <td>{bill.dueDate || '-'}</td>
+          <div className="overflow-x-auto">
+            <table className="table min-w-full">
+              <thead>
+                <tr>
+                  <th>Bill ID</th>
+                  <th>Order ID</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Due Date</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {bills.map(bill => (
+                  <tr key={bill.billID}>
+                    <td>#{bill.billID}</td>
+                    <td>#{bill.orderNumber}</td>
+                    <td>${bill.amount?.toFixed(2)}</td>
+                    <td>
+                      <span className={`badge badge-${bill.paymentStatus}`}>
+                        {bill.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
+                      </span>
+                    </td>
+                    <td>{bill.dueDate || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

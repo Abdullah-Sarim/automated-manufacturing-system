@@ -45,11 +45,13 @@ const DealerBills = () => {
   const totalPaid = paidBills.reduce((sum, b) => sum + (b.amount || 0), 0);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-secondary">My Bills</h1>
-      <p className="text-gray-600">View and manage your bills for product orders.</p>
+    <div className="space-y-6 w-full max-w-full">
+      <div>
+        <h1 className="text-2xl font-bold text-secondary">My Bills</h1>
+        <p className="text-gray-600">View and manage your bills for product orders.</p>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
           <p className="text-sm opacity-80">Pending Bills</p>
           <p className="text-3xl font-bold">{pendingBills.length}</p>
@@ -65,87 +67,91 @@ const DealerBills = () => {
       </div>
 
       {pendingBills.length > 0 && (
-        <div className="card border-l-4 border-yellow-400">
+        <div className="card border-l-4 border-yellow-400 w-full max-w-full overflow-hidden">
           <h2 className="text-xl font-semibold mb-4 text-yellow-700">Pending Payments</h2>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Bill ID</th>
-                <th>Order</th>
-                <th>Product</th>
-                <th>Amount</th>
-                <th>Due Date</th>
-                <th>Expected Delivery</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingBills.map(bill => {
-                const order = getOrderInfo(bill.orderNumber);
-                return (
-                  <tr key={bill.billID}>
-                    <td>#{bill.billID}</td>
-                    <td>#{bill.orderNumber}</td>
-                    <td>{bill.productName || order?.productName || '-'}</td>
-                    <td className="font-bold">${bill.amount?.toFixed(2)}</td>
-                    <td>{bill.dueDate || '-'}</td>
-                    <td>{bill.expectedDeliveryDate || '-'}</td>
-                    <td>
-                      <button 
-                        onClick={() => handlePay(bill.billID)} 
-                        className="px-4 py-2 bg-success text-white rounded hover:bg-green-600 transition-colors"
-                      >
-                        Pay Now
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="table min-w-full">
+              <thead>
+                <tr>
+                  <th>Bill ID</th>
+                  <th>Order</th>
+                  <th>Product</th>
+                  <th>Amount</th>
+                  <th>Due Date</th>
+                  <th>Expected Delivery</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingBills.map(bill => {
+                  const order = getOrderInfo(bill.orderNumber);
+                  return (
+                    <tr key={bill.billID}>
+                      <td>#{bill.billID}</td>
+                      <td>#{bill.orderNumber}</td>
+                      <td>{bill.productName || order?.productName || '-'}</td>
+                      <td className="font-bold">${bill.amount?.toFixed(2)}</td>
+                      <td>{bill.dueDate || '-'}</td>
+                      <td>{bill.expectedDeliveryDate || '-'}</td>
+                      <td>
+                        <button 
+                          onClick={() => handlePay(bill.billID)} 
+                          className="px-4 py-2 bg-success text-white rounded hover:bg-green-600 transition-colors"
+                        >
+                          Pay Now
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      <div className="card">
+      <div className="card w-full max-w-full overflow-hidden">
         <h2 className="text-xl font-semibold mb-4">Payment History</h2>
         {bills.length === 0 ? (
           <p className="text-gray-500">No bills yet.</p>
         ) : (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Bill ID</th>
-                <th>Order</th>
-                <th>Product</th>
-                <th>Amount</th>
-                <th>Due Date</th>
-                <th>Expected Delivery</th>
-                <th>Paid Date</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bills.map(bill => {
-                const order = getOrderInfo(bill.orderNumber);
-                return (
-                  <tr key={bill.billID}>
-                    <td>#{bill.billID}</td>
-                    <td>#{bill.orderNumber}</td>
-                    <td>{bill.productName || order?.productName || '-'}</td>
-                    <td>${bill.amount?.toFixed(2)}</td>
-                    <td>{bill.dueDate || '-'}</td>
-                    <td>{bill.expectedDeliveryDate || '-'}</td>
-                    <td>{bill.paidDate ? new Date(bill.paidDate).toLocaleDateString() : '-'}</td>
-                    <td>
-                      <span className={`badge badge-${bill.paymentStatus}`}>
-                        {bill.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="table min-w-full">
+              <thead>
+                <tr>
+                  <th>Bill ID</th>
+                  <th>Order</th>
+                  <th>Product</th>
+                  <th>Amount</th>
+                  <th>Due Date</th>
+                  <th>Expected Delivery</th>
+                  <th>Paid Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bills.map(bill => {
+                  const order = getOrderInfo(bill.orderNumber);
+                  return (
+                    <tr key={bill.billID}>
+                      <td>#{bill.billID}</td>
+                      <td>#{bill.orderNumber}</td>
+                      <td>{bill.productName || order?.productName || '-'}</td>
+                      <td>${bill.amount?.toFixed(2)}</td>
+                      <td>{bill.dueDate || '-'}</td>
+                      <td>{bill.expectedDeliveryDate || '-'}</td>
+                      <td>{bill.paidDate ? new Date(bill.paidDate).toLocaleDateString() : '-'}</td>
+                      <td>
+                        <span className={`badge badge-${bill.paymentStatus}`}>
+                          {bill.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

@@ -61,118 +61,124 @@ const Manufacturing = () => {
   const partialOrders = orders.filter(o => o.availability === 'partial');
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-6 w-full max-w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-secondary">Manufacturing Orders</h1>
         <button onClick={() => setShowModal(true)} className="btn btn-primary">New Manufacturing Order</button>
       </div>
 
       {lowStockProducts.length > 0 && (
-        <div className="card border-l-4 border-orange-500">
+        <div className="card border-l-4 border-orange-500 w-full max-w-full overflow-hidden">
           <h2 className="text-xl font-semibold mb-4 text-orange-700">Products Needing Manufacturing</h2>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Current Stock</th>
-                <th>Reorder Level</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lowStockProducts.map(product => (
-                <tr key={product.productID}>
-                  <td className="font-semibold">{product.name}</td>
-                  <td>{product.stock}</td>
-                  <td>{product.reorderLevel}</td>
-                  <td>
-                    <span className={`badge ${product.stock === 0 ? 'badge-cancelled' : product.stock < product.reorderLevel ? 'badge-pending' : 'badge-processing'}`}>
-                      {product.stock === 0 ? 'Out of Stock' : product.stock < product.reorderLevel ? 'Low Stock' : 'Partial'}
-                    </span>
-                  </td>
-                  <td>
-                    <button 
-                      onClick={() => { setFormData({...formData, productID: product.productID.toString(), quantity: (product.reorderLevel * 2 - product.stock).toString()}); setShowModal(true); }}
-                      className="px-3 py-1 bg-primary text-white rounded text-sm hover:bg-blue-700"
-                    >
-                      Start Manufacturing
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="table min-w-full">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Current Stock</th>
+                  <th>Reorder Level</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {lowStockProducts.map(product => (
+                  <tr key={product.productID}>
+                    <td className="font-semibold">{product.name}</td>
+                    <td>{product.stock}</td>
+                    <td>{product.reorderLevel}</td>
+                    <td>
+                      <span className={`badge ${product.stock === 0 ? 'badge-cancelled' : product.stock < product.reorderLevel ? 'badge-pending' : 'badge-processing'}`}>
+                        {product.stock === 0 ? 'Out of Stock' : product.stock < product.reorderLevel ? 'Low Stock' : 'Partial'}
+                      </span>
+                    </td>
+                    <td>
+                      <button 
+                        onClick={() => { setFormData({...formData, productID: product.productID.toString(), quantity: (product.reorderLevel * 2 - product.stock).toString()}); setShowModal(true); }}
+                        className="px-3 py-1 bg-primary text-white rounded text-sm hover:bg-blue-700"
+                      >
+                        Start Manufacturing
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {partialOrders.length > 0 && (
-        <div className="card border-l-4 border-yellow-500">
+        <div className="card border-l-4 border-yellow-500 w-full max-w-full overflow-hidden">
           <h2 className="text-xl font-semibold mb-4 text-yellow-700">Orders with Partial Stock Availability</h2>
-          <table className="table">
+          <div className="overflow-x-auto">
+            <table className="table min-w-full">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Product</th>
+                  <th>Ordered Qty</th>
+                  <th>Available Stock</th>
+                  <th>Shortage</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {partialOrders.map(order => (
+                  <tr key={order.orderID}>
+                    <td>#{order.orderID}</td>
+                    <td className="font-semibold">{order.productName}</td>
+                    <td>{order.quantity}</td>
+                    <td>{order.productStock}</td>
+                    <td className="text-red-600 font-bold">{order.quantity - order.productStock}</td>
+                    <td>
+                      <button 
+                        onClick={() => { setFormData({...formData, productID: order.productID.toString(), quantity: (order.quantity - order.productStock).toString()}); setShowModal(true); }}
+                        className="px-3 py-1 bg-warning text-white rounded text-sm hover:bg-yellow-600"
+                      >
+                        Manufacture Now
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      <div className="card w-full max-w-full overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table min-w-full">
             <thead>
               <tr>
-                <th>Order ID</th>
+                <th>ID</th>
                 <th>Product</th>
-                <th>Ordered Qty</th>
-                <th>Available Stock</th>
-                <th>Shortage</th>
+                <th>Quantity</th>
+                <th>Status</th>
+                <th>Start Date</th>
+                <th>End Date</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {partialOrders.map(order => (
-                <tr key={order.orderID}>
-                  <td>#{order.orderID}</td>
-                  <td className="font-semibold">{order.productName}</td>
-                  <td>{order.quantity}</td>
-                  <td>{order.productStock}</td>
-                  <td className="text-red-600 font-bold">{order.quantity - order.productStock}</td>
+              {mfgOrders.map(mfg => (
+                <tr key={mfg.mfgID}>
+                  <td>#{mfg.mfgID}</td>
+                  <td>{mfg.productName}</td>
+                  <td>{mfg.quantity}</td>
+                  <td><span className={`badge badge-${mfg.status}`}>{mfg.status}</span></td>
+                  <td>{mfg.startDate ? new Date(mfg.startDate).toLocaleDateString() : '-'}</td>
+                  <td>{mfg.endDate ? new Date(mfg.endDate).toLocaleDateString() : '-'}</td>
                   <td>
-                    <button 
-                      onClick={() => { setFormData({...formData, productID: order.productID.toString(), quantity: (order.quantity - order.productStock).toString()}); setShowModal(true); }}
-                      className="px-3 py-1 bg-warning text-white rounded text-sm hover:bg-yellow-600"
-                    >
-                      Manufacture Now
-                    </button>
+                    {mfg.status === 'pending' && <button onClick={() => handleStart(mfg.mfgID)} className="text-accent hover:underline mr-3">Start</button>}
+                    {mfg.status === 'in_progress' && <button onClick={() => handleComplete(mfg.mfgID)} className="text-success hover:underline">Complete</button>}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      )}
-
-      <div className="card">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Product</th>
-              <th>Quantity</th>
-              <th>Status</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {mfgOrders.map(mfg => (
-              <tr key={mfg.mfgID}>
-                <td>#{mfg.mfgID}</td>
-                <td>{mfg.productName}</td>
-                <td>{mfg.quantity}</td>
-                <td><span className={`badge badge-${mfg.status}`}>{mfg.status}</span></td>
-                <td>{mfg.startDate ? new Date(mfg.startDate).toLocaleDateString() : '-'}</td>
-                <td>{mfg.endDate ? new Date(mfg.endDate).toLocaleDateString() : '-'}</td>
-                <td>
-                  {mfg.status === 'pending' && <button onClick={() => handleStart(mfg.mfgID)} className="text-accent hover:underline mr-3">Start</button>}
-                  {mfg.status === 'in_progress' && <button onClick={() => handleComplete(mfg.mfgID)} className="text-success hover:underline">Complete</button>}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
 
       {showModal && (

@@ -89,10 +89,10 @@ const UserManagement = () => {
   if (loading) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full">
       <h1 className="text-2xl font-bold text-secondary">User Management</h1>
 
-      <div className="flex space-x-4 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         <button 
           onClick={() => setActiveTab('pending')} 
           className={`px-4 py-2 rounded ${activeTab === 'pending' ? 'bg-accent text-white' : 'bg-gray-200'}`}
@@ -120,146 +120,154 @@ const UserManagement = () => {
       </div>
 
       {activeTab === 'managers' && (
-        <div className="card">
+        <div className="card w-full max-w-full overflow-hidden">
           <h2 className="text-xl font-semibold mb-4">Managers</h2>
           {managers.length === 0 ? (
             <p className="text-gray-500">No managers found</p>
           ) : (
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Username</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {managers.map(user => (
-                  <tr key={user.userID}>
-                    <td>{user.username}</td>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td><span className={`badge badge-${user.approvalStatus}`}>{user.approvalStatus}</span></td>
-                    <td>
-                      <button 
-                        onClick={() => handleDeleteManager(user.userID)}
-                        className="text-danger hover:underline"
-                      >
-                        Delete
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="table min-w-full">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {managers.map(user => (
+                    <tr key={user.userID}>
+                      <td>{user.username}</td>
+                      <td>{user.name}</td>
+                      <td>{user.email}</td>
+                      <td><span className={`badge badge-${user.approvalStatus}`}>{user.approvalStatus}</span></td>
+                      <td>
+                        <button 
+                          onClick={() => handleDeleteManager(user.userID)}
+                          className="text-danger hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
 
       {activeTab === 'pending' && (
-        <div className="card">
+        <div className="card w-full max-w-full overflow-hidden">
           <h2 className="text-xl font-semibold mb-4">Pending User Approvals</h2>
           {pendingUsers.length === 0 ? (
             <p className="text-gray-500">No pending users</p>
           ) : (
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Username</th>
-                  <th>Role</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Company</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingUsers.map(user => (
-                  <tr key={user.userID}>
-                    <td>{user.username}</td>
-                    <td><span className="badge badge-pending capitalize">{user.role}</span></td>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>{user.companyName || user.supplierName || '-'}</td>
-                    <td>
-                      <button onClick={() => handleApprove(user.userID)} className="text-success hover:underline mr-3">Approve</button>
-                      <button onClick={() => handleReject(user.userID)} className="text-danger hover:underline">Reject</button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="table min-w-full">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Company</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {pendingUsers.map(user => (
+                    <tr key={user.userID}>
+                      <td>{user.username}</td>
+                      <td><span className="badge badge-pending capitalize">{user.role}</span></td>
+                      <td>{user.name}</td>
+                      <td>{user.email}</td>
+                      <td>{user.companyName || user.supplierName || '-'}</td>
+                      <td>
+                        <button onClick={() => handleApprove(user.userID)} className="text-success hover:underline mr-3">Approve</button>
+                        <button onClick={() => handleReject(user.userID)} className="text-danger hover:underline">Reject</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
 
       {activeTab === 'dealers' && (
-        <div className="card">
+        <div className="card w-full max-w-full overflow-hidden">
           <h2 className="text-xl font-semibold mb-4">Dealers</h2>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Company</th>
-                <th>Contact</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dealers.map(dealer => (
-                <tr key={dealer.dealerID}>
-                  <td>{dealer.dealerID}</td>
-                  <td>{dealer.companyName}</td>
-                  <td>{dealer.contactPerson || '-'}</td>
-                  <td>{dealer.phone || '-'}</td>
-                  <td>{dealer.email || '-'}</td>
-                  <td>
-                    <span className={`badge ${dealer.approved ? 'badge-completed' : 'badge-pending'}`}>
-                      {dealer.approved ? 'Approved' : 'Pending'}
-                    </span>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="table min-w-full">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Company</th>
+                  <th>Contact</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {dealers.map(dealer => (
+                  <tr key={dealer.dealerID}>
+                    <td>{dealer.dealerID}</td>
+                    <td>{dealer.companyName}</td>
+                    <td>{dealer.contactPerson || '-'}</td>
+                    <td>{dealer.phone || '-'}</td>
+                    <td>{dealer.email || '-'}</td>
+                    <td>
+                      <span className={`badge ${dealer.approved ? 'badge-completed' : 'badge-pending'}`}>
+                        {dealer.approved ? 'Approved' : 'Pending'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {activeTab === 'suppliers' && (
-        <div className="card">
+        <div className="card w-full max-w-full overflow-hidden">
           <h2 className="text-xl font-semibold mb-4">Suppliers</h2>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Company</th>
-                <th>Contact</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {suppliers.map(supplier => (
-                <tr key={supplier.supplierID}>
-                  <td>{supplier.supplierID}</td>
-                  <td>{supplier.companyName}</td>
-                  <td>{supplier.contactPerson || '-'}</td>
-                  <td>{supplier.phone || '-'}</td>
-                  <td>{supplier.email || '-'}</td>
-                  <td>
-                    <span className={`badge ${supplier.approved ? 'badge-completed' : 'badge-pending'}`}>
-                      {supplier.approved ? 'Approved' : 'Pending'}
-                    </span>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="table min-w-full">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Company</th>
+                  <th>Contact</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {suppliers.map(supplier => (
+                  <tr key={supplier.supplierID}>
+                    <td>{supplier.supplierID}</td>
+                    <td>{supplier.companyName}</td>
+                    <td>{supplier.contactPerson || '-'}</td>
+                    <td>{supplier.phone || '-'}</td>
+                    <td>{supplier.email || '-'}</td>
+                    <td>
+                      <span className={`badge ${supplier.approved ? 'badge-completed' : 'badge-pending'}`}>
+                        {supplier.approved ? 'Approved' : 'Pending'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

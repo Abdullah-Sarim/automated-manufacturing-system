@@ -83,10 +83,10 @@ const Dashboard = () => {
   const netEarnings = totalDealerReceived - totalSupplierPaid;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full">
       <h1 className="text-2xl font-bold text-secondary">Dashboard</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="card">
           <div className="flex items-center justify-between">
             <div>
@@ -147,7 +147,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm opacity-80">Total Earnings</p>
-              <p className="text-2xl font-bold">${totalEarnings.toFixed(2)}</p>
+              <p className="text-2xl font-bold">${netEarnings.toFixed(2)}</p>
               <p className="text-xs opacity-70 mt-1">Click to view details</p>
             </div>
             <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
