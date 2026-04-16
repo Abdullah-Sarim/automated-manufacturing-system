@@ -1,23 +1,28 @@
 import { useState, useEffect } from 'react';
-import { getManufacturingOrders, getOrders, getProducts, createManufacturingOrder, startManufacturing, completeManufacturing } from '../utils/api';
+import { getManufacturingOrders, getOrders, getProducts, getMaterials, createManufacturingOrder, startManufacturing, completeManufacturing } from '../utils/api';
 import toast from 'react-hot-toast';
 
 const Manufacturing = () => {
   const [orders, setOrders] = useState([]);
   const [mfgOrders, setMfgOrders] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
+  const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showMaterialsModal, setShowMaterialsModal] = useState(false);
+  const [selectedMfgId, setSelectedMfgId] = useState(null);
   const [formData, setFormData] = useState({ orderID: '', productID: '', quantity: '' });
+  const [selectedMaterials, setSelectedMaterials] = useState([]);
 
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     try {
-      const [mfgRes, ordersRes, productsRes] = await Promise.all([getManufacturingOrders(), getOrders(), getProducts()]);
+      const [mfgRes, ordersRes, productsRes, materialsRes] = await Promise.all([getManufacturingOrders(), getOrders(), getProducts(), getMaterials()]);
       setMfgOrders(mfgRes.data);
       setOrders(ordersRes.data.filter(o => o.status !== 'completed'));
       setAllProducts(productsRes.data);
+      setMaterials(materialsRes.data);
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -37,9 +42,40 @@ const Manufacturing = () => {
     }
   };
 
-  const handleStart = async (id) => {
+  const handleStartClick = (id) => {
+    setSelectedMfgId(id);
+    setSelectedMaterials([]);
+    setShowMaterialsModal(true);
+  };
+
+  const handleAddMaterial = (materialId) => {
+    const material = materials.find(m => m.materialID === materialId);
+    if (material) {
+      const existing = selectedMaterials.find(m => m.materialID === materialId);
+      if (existing) {
+        setSelectedMaterials(selectedMaterials.map(m => 
+          m.materialID === materialId ? { ...m, quantity: m.quantity + 1 } : m
+        ));
+      } else {
+        setSelectedMaterials([...selectedMaterials, { materialID: materialId, name: material.name, quantity: 1, available: material.quantity }]);
+      }
+    }
+  };
+
+  const handleRemoveMaterial = (materialId) => {
+    setSelectedMaterials(selectedMaterials.filter(m => m.materialID !== materialId));
+  };
+
+  const handleMaterialQuantityChange = (materialId, qty) => {
+    setSelectedMaterials(selectedMaterials.map(m => 
+      m.materialID === materialId ? { ...m, quantity: parseInt(qty) || 0 } : m
+    ));
+  };
+
+  const handleStart = async () => {
     try {
-      await startManufacturing(id);
+      await startManufacturing(selectedMfgId, { materials: selectedMaterials.map(m => ({ materialID: m.materialID, quantity: m.quantity })) });
+      setShowMaterialsModal(false);
       fetchData();
     } catch (error) {
       toast.error(error.response?.data?.error || 'Error starting manufacturing');
@@ -171,7 +207,7 @@ const Manufacturing = () => {
                   <td>{mfg.startDate ? new Date(mfg.startDate).toLocaleDateString() : '-'}</td>
                   <td>{mfg.endDate ? new Date(mfg.endDate).toLocaleDateString() : '-'}</td>
                   <td>
-                    {mfg.status === 'pending' && <button onClick={() => handleStart(mfg.mfgID)} className="text-accent hover:underline mr-3">Start</button>}
+                    {mfg.status === 'pending' && <button onClick={() => handleStartClick(mfg.mfgID)} className="text-accent hover:underline mr-3">Start</button>}
                     {mfg.status === 'in_progress' && <button onClick={() => handleComplete(mfg.mfgID)} className="text-success hover:underline">Complete</button>}
                   </td>
                 </tr>
@@ -198,6 +234,53 @@ const Manufacturing = () => {
                 <button type="submit" className="btn btn-primary">Create</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showMaterialsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-lg">
+            <h2 className="text-xl font-bold mb-4">Select Raw Materials</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Add Material</label>
+                <select 
+                  className="input" 
+                  onChange={(e) => { if (e.target.value) handleAddMaterial(parseInt(e.target.value)); e.target.value = ''; }}
+                >
+                  <option value="">Select a material to add</option>
+                  {materials.map(m => <option key={m.materialID} value={m.materialID}>{m.name} (Available: {m.quantity} {m.unit})</option>)}
+                </select>
+              </div>
+              
+              {selectedMaterials.length > 0 && (
+                <div className="border rounded p-3">
+                  <h3 className="font-semibold mb-2">Materials to Use:</h3>
+                  {selectedMaterials.map(m => (
+                    <div key={m.materialID} className="flex items-center justify-between mb-2">
+                      <span className="text-sm">{m.name}</span>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="number" 
+                          min="1" 
+                          max={m.available} 
+                          value={m.quantity} 
+                          onChange={(e) => handleMaterialQuantityChange(m.materialID, e.target.value)}
+                          className="input w-20"
+                        />
+                        <span className="text-xs text-gray-500">/ {m.available} available</span>
+                        <button type="button" onClick={() => handleRemoveMaterial(m.materialID)} className="text-red-500 hover:text-red-700">✕</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end space-x-3 mt-4">
+              <button type="button" onClick={() => setShowMaterialsModal(false)} className="btn btn-secondary">Cancel</button>
+              <button onClick={handleStart} className="btn btn-primary">Start Manufacturing</button>
+            </div>
           </div>
         </div>
       )}

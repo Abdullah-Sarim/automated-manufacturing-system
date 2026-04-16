@@ -80,7 +80,7 @@ export const generateSupplierBill = (id, data) => API.put('/quotations/' + id + 
 export const getManufacturingOrders = () => API.get('/manufacturing');
 export const getManufacturingOrder = (id) => API.get('/manufacturing/' + id);
 export const createManufacturingOrder = (data) => API.post('/manufacturing', data);
-export const startManufacturing = (id) => API.put('/manufacturing/' + id + '/start');
+export const startManufacturing = (id, data = {}) => API.put('/manufacturing/' + id + '/start', data);
 export const completeManufacturing = (id) => API.put('/manufacturing/' + id + '/complete');
 export const updateManufacturingOrder = (id, data) => API.put('/manufacturing/' + id, data);
 

@@ -65,8 +65,35 @@ router.post('/', authenticate, authorize('admin', 'manager'), logAction('Create 
 
 router.put('/:id/start', authenticate, authorize('admin', 'manager'), logAction('Start manufacturing'), (req, res) => {
   try {
+    const { materials } = req.body;
+    
+    const mfgOrder = db.get('SELECT * FROM manufacturing_orders WHERE mfgID = ?', [req.params.id]);
+    if (!mfgOrder) {
+      return res.status(404).json({ error: 'Manufacturing order not found' });
+    }
+
+    if (mfgOrder.status !== 'pending') {
+      return res.status(400).json({ error: 'Manufacturing already started or completed' });
+    }
+
+    if (materials && materials.length > 0) {
+      for (const item of materials) {
+        const material = db.get('SELECT * FROM raw_materials WHERE materialID = ?', [item.materialID]);
+        if (!material) {
+          return res.status(404).json({ error: `Material with ID ${item.materialID} not found` });
+        }
+        if (material.quantity < item.quantity) {
+          return res.status(400).json({ error: `Insufficient stock for material: ${material.name}` });
+        }
+        
+        db.run('UPDATE raw_materials SET quantity = quantity - ? WHERE materialID = ?', [item.quantity, item.materialID]);
+        
+        db.run('INSERT INTO manufacturing_materials (mfgID, materialID, quantityUsed) VALUES (?, ?, ?)', [req.params.id, item.materialID, item.quantity]);
+      }
+    }
+
     db.run("UPDATE manufacturing_orders SET status = 'in_progress', startDate = ? WHERE mfgID = ?", [new Date().toISOString(), req.params.id]);
-    res.json({ message: 'Manufacturing started' });
+    res.json({ message: 'Manufacturing started', materialsUsed: materials || [] });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

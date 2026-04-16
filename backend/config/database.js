@@ -123,6 +123,15 @@ const initDb = async () => {
       FOREIGN KEY (materialID) REFERENCES raw_materials(materialID)
     );
 
+    CREATE TABLE IF NOT EXISTS manufacturing_materials (
+      mfgMaterialID INTEGER PRIMARY KEY AUTOINCREMENT,
+      mfgID INTEGER NOT NULL,
+      materialID INTEGER NOT NULL,
+      quantityUsed INTEGER NOT NULL,
+      FOREIGN KEY (mfgID) REFERENCES manufacturing_orders(mfgID),
+      FOREIGN KEY (materialID) REFERENCES raw_materials(materialID)
+    );
+
     CREATE TABLE IF NOT EXISTS manufacturing_orders (
       mfgID INTEGER PRIMARY KEY AUTOINCREMENT,
       orderID INTEGER,
