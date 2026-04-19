@@ -102,12 +102,12 @@ const Header = ({ className = '' }) => {
       </div>
 
       <div className="flex items-center gap-2">
-        <button
+        {/* <button
           onClick={toggleDarkMode}
           className="p-2.5 rounded-xl text-gray-500 hover:bg-gray-100 transition-all"
         >
           {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
+        </button> */}
 
         <div className="relative" ref={notifRef}>
           <button
