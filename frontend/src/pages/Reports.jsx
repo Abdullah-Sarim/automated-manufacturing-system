@@ -59,13 +59,20 @@ const Reports = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: { display: true, position: 'bottom' },
-      tooltip: { enabled: true }
+      tooltip: { 
+        enabled: true,
+        callbacks: {
+          label: (context) => `$${context.raw?.toLocaleString() || 0}`
+        }
+      }
     },
     scales: {
-      y: { beginAtZero: true }
-    },
-    elements: {
-      line: { tension: 0.4 }
+      y: { 
+        beginAtZero: true,
+        ticks: {
+          callback: (value) => '$' + value.toLocaleString()
+        }
+      }
     }
   };
 
@@ -95,22 +102,29 @@ const Reports = () => {
   const products = stockData?.products || [];
   const salesByMonth = salesData?.salesByMonth || [];
 
+  const parseNumber = (val) => {
+    const num = Number(val);
+    return isNaN(num) ? 0 : num;
+  };
+
   const salesChartData = {
     labels: salesByMonth.map(s => s.month || ''),
     datasets: [{
       label: 'Sales ($)',
-      data: salesByMonth.map(s => s.total || 0),
+      data: salesByMonth.map(s => parseNumber(s.total)),
       borderColor: '#0ea5e9',
-      backgroundColor: 'rgba(14, 165, 233, 0.1)',
-      fill: true,
-      tension: 0.4
+      backgroundColor: 'rgba(14, 165, 233, 0.2)',
+      fill: false,
+      tension: 0.4,
+      pointRadius: 5,
+      pointBackgroundColor: '#0ea5e9'
     }]
   };
 
   const productChartData = {
     labels: salesByProduct.slice(0, 5).map(s => s.name || 'Unknown'),
     datasets: [{
-      data: salesByProduct.slice(0, 5).map(s => s.total || 0),
+      data: salesByProduct.slice(0, 5).map(s => parseNumber(s.total)),
       backgroundColor: ['#0ea5e9', '#f59e0b', '#22c55e', '#8b5cf6', '#ec4899'],
       borderWidth: 0
     }]
@@ -120,7 +134,7 @@ const Reports = () => {
     labels: salesByDealer.slice(0, 5).map(d => d.companyName || 'Unknown'),
     datasets: [{
       label: 'Revenue ($)',
-      data: salesByDealer.slice(0, 5).map(d => d.total || 0),
+      data: salesByDealer.slice(0, 5).map(d => parseNumber(d.total)),
       backgroundColor: '#22c55e',
       borderRadius: 4
     }]
@@ -130,7 +144,7 @@ const Reports = () => {
     labels: products.slice(0, 8).map(p => p.name || 'Unknown'),
     datasets: [{
       label: 'Stock Qty',
-      data: products.slice(0, 8).map(p => p.stock || 0),
+      data: products.slice(0, 8).map(p => parseNumber(p.stock)),
       backgroundColor: '#0ea5e9',
       borderRadius: 4
     }]
